@@ -12,3 +12,15 @@ can exceed this limit. We aim to bridge this gap between finetuning and in-conte
 that is efficient and improves outputs without expensive finetuning/training these large LMs on large datasets.
 
 
+## Environment Steup
+
+```conda create --name dl_project python=3.9```
+
+```conda activate dl_project ```
+
+```pip install -r requirements.txt```
+
+
+## CLI
+
+```python main.py train --data-path ./data/dataset.csv --model-name my_model --epochs 20```
