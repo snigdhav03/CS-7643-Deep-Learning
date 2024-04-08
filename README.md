@@ -23,4 +23,8 @@ that is efficient and improves outputs without expensive finetuning/training the
 
 ## CLI
 
-```python main.py train --data-path ./data/dataset.csv --model-name my_model --epochs 20```
+Dataset name options: qqp, mnli, rte
+
+To run the model:
+
+```python main.py --checkpoint bert-base-uncased --dataset qqp```

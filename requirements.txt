@@ -1,10 +1,7 @@
+torch
+datasets
+transformers
 numpy
 pandas
-scikit-learn
-tensorflow
-torch
-torchvision 
-torchtext
 typer
-spacy
-
+evaluate
