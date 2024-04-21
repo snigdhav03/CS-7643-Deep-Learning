@@ -5,22 +5,20 @@ class QQPPrompt:
     def __init__(self, mode='icl', example=16):
         self._mode = mode
         self._example = example
-        self._context_prefix = "Given two questions, question1 and question2, evaluate if both the questions are same or different. Return 1 for same and return 0 for different. Examples:\n\n"
+        self._context_prefix = "Question: Do both questions ask the same thing? "
 
     def generate_context(self, batch, exclude_index):
-        # Generate context based on the batch data excluding the current instance
         indices = list(range(len(batch['question1'])))
-        indices.remove(exclude_index)  # Remove the current index from context generation
+        indices.remove(exclude_index)
         random.shuffle(indices)
-
-        # Sample fewer examples if not enough entries are available after exclusion
         sample_size = min(self._example, len(indices))
         context = [
-
-            "question1: " + batch['question1'][i] + "\n" +
-            "question2: " + batch['question2'][i] + "\n" +
-            "output: " + str(batch['label'][i].item())
-            for i in indices[:sample_size]  # Use shuffled indices to pick examples
+            # self._context_prefix + "\n" +
+            "Question 1: " + batch['question1'][i] + "\n" +
+            "Question 2: " + batch['question2'][i] + "\n" +
+            self._context_prefix +
+            "Answer: " + ('Yes' if batch['label'][i].item() == 1 else 'No')
+            for i in indices[:sample_size]
         ]
 
         return context
@@ -29,22 +27,30 @@ class QQPPrompt:
         prompts = []
         labels = batch['label']
         for idx in range(len(batch['question1'])):
-            # Generate context excluding the current index
             context = self.generate_context(batch, idx)
-
-            # Create the current prompt using string concatenation
             current_prompt = (
-                    "question1: " + batch['question1'][idx] + "\n" +
-                    "question2: " + batch['question2'][idx] + "\n" +
-                    "output: "
+                    # self._context_prefix + "\n" +
+                    "Question 1: " + batch['question1'][idx] + "\n" +
+                    "Question 2: " + batch['question2'][idx] + "\n" +
+                    self._context_prefix +
+                    "Answer: "
             )
-
-            # Combine context and current prompt
-            full_prompt = '\n'.join(context) + "\n\n" + current_prompt
-            full_prompt = self._context_prefix + full_prompt
+            full_prompt = '\n\n'.join(context) + "\n\n" + current_prompt
+            # full_prompt = self._context_prefix + full_prompt
             prompts.append(full_prompt)
 
         return prompts, labels
+
+    def extract_predicted_answer(self, preds):
+        answers = []
+        for pred in preds:
+            last_answer_start = pred.rfind("Answer: ") + len("Answer: ")
+            if last_answer_start > len("Answer: "):
+                answer = pred[last_answer_start:].strip().split('\n')[0]
+            else:
+                answer = "No answer found"
+            answers.append(answer)
+        return answers
 
     def __call__(self, batch):
         return self.get_prompt(batch)
