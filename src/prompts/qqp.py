@@ -27,7 +27,8 @@ class QQPPrompt:
         prompts = []
         labels = batch['label']
         for idx in range(len(batch['question1'])):
-            context = self.generate_context(batch, idx)
+            if self._mode == 'icl':
+                context = self.generate_context(batch, idx)
             current_prompt = (
                     # self._context_prefix + "\n" +
                     "Question 1: " + batch['question1'][idx] + "\n" +
@@ -35,8 +36,10 @@ class QQPPrompt:
                     self._context_prefix +
                     "Answer: "
             )
-            full_prompt = '\n\n'.join(context) + "\n\n" + current_prompt
-            # full_prompt = self._context_prefix + full_prompt
+            if self._mode == 'icl':
+                full_prompt = '\n\n'.join(context) + "\n\n" + current_prompt
+            else:
+                full_prompt = current_prompt
             prompts.append(full_prompt)
 
         return prompts, labels
