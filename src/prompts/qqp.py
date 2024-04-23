@@ -1,5 +1,7 @@
 import random
 
+import torch
+
 
 class QQPPrompt:
     def __init__(self, mode='icl', example=16):
@@ -54,6 +56,10 @@ class QQPPrompt:
                 answer = "No answer found"
             answers.append(answer)
         return answers
+
+    def label_to_answer(self, label):
+        result = ['No' if x == 0 else 'Yes' for x in label]
+        return result
 
     def __call__(self, batch):
         return self.get_prompt(batch)

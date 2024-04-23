@@ -8,7 +8,7 @@ import torch
 
 def in_context_learning(model_name, dataset, batch_size=32, device='cpu', examples=16):
     os.makedirs(cache_dir, exist_ok=True)
-    model = OPT(model_name, device=device)
+    model = OPT(model_name, device=device, mode='classifier')
     dataset = DatasetLoader(dataset, device=device, batch_size=batch_size)
     dataset.loadDataset()
     prompt_generator = QQPPrompt(mode='sft', example=examples)
@@ -17,6 +17,6 @@ def in_context_learning(model_name, dataset, batch_size=32, device='cpu', exampl
     with torch.no_grad():
         for data in test_data:
             input, label = prompt_generator(data)
-            pred = model(input)
-            pred = prompt_generator.extract_predicted_answer(pred)
-            print(pred)
+            label_string = prompt_generator.label_to_answer(label)
+            logit, loss = model(input, label_string)
+            print(logit, loss)
