@@ -11,7 +11,7 @@ def in_context_learning(model_name, dataset, batch_size=32, device='cpu', exampl
     model = OPT(model_name, device=device, mode='classifier')
     dataset = DatasetLoader(dataset, device=device, batch_size=batch_size)
     dataset.loadDataset()
-    prompt_generator = QQPPrompt(mode='sft', example=examples)
+    prompt_generator = QQPPrompt(mode='icl', example=examples)
     test_data = dataset.val
     model.eval()
     with torch.no_grad():
