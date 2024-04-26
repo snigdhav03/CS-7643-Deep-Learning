@@ -5,3 +5,4 @@ numpy
 pandas
 typer
 evaluate
+peft

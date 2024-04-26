@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import torch
 import torch.nn as nn
 from transformers import OPTForCausalLM, GPT2Tokenizer
@@ -8,14 +10,17 @@ from src.models.opt_with_classifier import OPTWithLMClassifier
 
 class OPT(nn.Module):
     def __init__(self, model_name, adapter_name, device='cpu', sample=False, top_k=None, top_p=None, cache_dir=None,
-                 mode='generator', adapter_config=None):
+                 mode='generator', adapter_config=None, checkpoint=None):
         super(OPT, self).__init__()
+        self.model_name = model_name
+        self.adapter_name = adapter_name if adapter_name else 'none'
+        self.checkpoint = checkpoint
         self.device = device
         self.mode = mode
         if mode == 'classifier':
-            self.model = OPTWithLMClassifier.from_pretrained(f'facebook/{model_name}', cache_dir=cache_dir)
+            self.model = OPTWithLMClassifier.from_pretrained(checkpoint, cache_dir=cache_dir)
         elif mode == 'generator':
-            self.model = OPTForCausalLM.from_pretrained(f'facebook/{model_name}', cache_dir=cache_dir)
+            self.model = OPTForCausalLM.from_pretrained(checkpoint, cache_dir=cache_dir)
         else:
             raise ValueError(f"Invalid mode: {mode}")
         if adapter_name:
@@ -51,3 +56,15 @@ class OPT(nn.Module):
         output = self.model(**tokens, labels=labels)
         logit, loss = output.logits, output.loss
         return logit, loss
+
+    def get_name(self):
+        if 'facebook' in self.checkpoint:
+            timestamp_str = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+            return f'models--local--{self.model_name}--{self.adapter_name}--{timestamp_str}'
+        else:
+            return self.checkpoint
+
+    def save(self, path_dir):
+        path = f'./{path_dir}/{self.get_name()}'
+        self.model.save_pretrained(path)
+        return path
