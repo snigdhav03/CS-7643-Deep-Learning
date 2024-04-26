@@ -12,7 +12,7 @@ can exceed this limit. We aim to bridge this gap between finetuning and in-conte
 that is efficient and improves outputs without expensive finetuning/training these large LMs on large datasets.
 
 
-## Environment Steup
+## Environment Setup
 
 ```conda create --name dl_project python=3.9```
 
@@ -28,3 +28,9 @@ Dataset name options: qqp, mnli, rte
 To run the model:
 
 ```python main.py --checkpoint bert-base-uncased --dataset qqp```
+
+## Running with Adapters
+Example command:
+```python3 main.py --dataset qqp --model_name opt-125m --task_type icl --device cpu --batch_size 8 --adapter_name PROMPT_TUNING```
+
+Current accepted adapters: LORA, PROMPT_TUNING
