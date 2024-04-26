@@ -1,13 +1,14 @@
 import torch
 import torch.nn as nn
 from transformers import OPTForCausalLM, GPT2Tokenizer
+from src.adapters.addAdapter import add_adapter
 
 from src.models.opt_with_classifier import OPTWithLMClassifier
 
 
 class OPT(nn.Module):
-    def __init__(self, model_name, device='cpu', sample=False, top_k=None, top_p=None, cache_dir=None,
-                 mode='generator'):
+    def __init__(self, model_name, adapter_name, device='cpu', sample=False, top_k=None, top_p=None, cache_dir=None,
+                 mode='generator', adapter_config=None):
         super(OPT, self).__init__()
         self.device = device
         self.mode = mode
@@ -17,6 +18,8 @@ class OPT(nn.Module):
             self.model = OPTForCausalLM.from_pretrained(f'facebook/{model_name}', cache_dir=cache_dir)
         else:
             raise ValueError(f"Invalid mode: {mode}")
+        if adapter_name:
+            self.model = add_adapter(self.model, adapter_name, adapter_config)
         self.tokenizer = GPT2Tokenizer.from_pretrained(f'facebook/{model_name}', cache_dir=cache_dir)
         self.model.to(self.device)
         self.sample = sample

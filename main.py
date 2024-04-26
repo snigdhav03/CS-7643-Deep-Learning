@@ -14,6 +14,7 @@ def parse_args():
                         choices=task_types)
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size for training')
     parser.add_argument('--device', type=str, default='cpu', help='Device to use for training')
+    parser.add_argument('--adapter_name', type=str, default='', help='Choose the adapter with which to fine-tune')
     args = parser.parse_args()
     return args
 
@@ -24,7 +25,7 @@ def main():
     # custom_trainer.train()
     if args.task_type == 'icl':
         print('In Context Learning')
-        in_context_learning(args.model_name, args.dataset, batch_size=args.batch_size, device=args.device)
+        in_context_learning(args.model_name, args.dataset, batch_size=args.batch_size, device=args.device, adapter_name=args.adapter_name)
 
 
 if __name__ == "__main__":

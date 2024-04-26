@@ -6,9 +6,9 @@ import os
 import torch
 
 
-def in_context_learning(model_name, dataset, batch_size=32, device='cpu', examples=16):
+def in_context_learning(model_name, dataset, adapter_name, batch_size=32, device='cpu', examples=16, ):
     os.makedirs(cache_dir, exist_ok=True)
-    model = OPT(model_name, device=device, mode='classifier')
+    model = OPT(model_name, adapter_name, device=device, mode='classifier')
     dataset = DatasetLoader(dataset, device=device, batch_size=batch_size)
     dataset.loadDataset()
     prompt_generator = QQPPrompt(mode='icl', example=examples)
