@@ -14,7 +14,7 @@ class OPT(nn.Module):
                  mode='generator', adapter_config=None, checkpoint=None):
         super(OPT, self).__init__()
         self.model_name = model_name
-        self.adapter_name = adapter_name if adapter_name else 'none'
+        self.adapter_name = adapter_name
         self.checkpoint = checkpoint
         self.device = device
         self.mode = mode
@@ -24,7 +24,7 @@ class OPT(nn.Module):
             self.model = OPTForCausalLM.from_pretrained(checkpoint, cache_dir=cache_dir)
         else:
             raise ValueError(f"Invalid mode: {mode}")
-        if adapter_name:
+        if adapter_name and adapter_name is not 'None':
             self.model = add_adapter(self.model, adapter_name, adapter_config)
         self.tokenizer = GPT2Tokenizer.from_pretrained(f'facebook/{model_name}', cache_dir=cache_dir)
         self.model.to(self.device)

@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from src.data.datasetLoader import DatasetLoader
 from src.models.opt import OPT
@@ -25,9 +26,8 @@ def evaluate(model_name, dataset, adapter_name, mode, batch_size=32, device='cpu
     model_name_for_results = f'{model_name}_{adapter_name}_{mode}'
     results = {'idx': [], 'input': [], 'label': [], 'prediction': [], 'probabilities': []}
     # path = model.save(cache_dir)
-    i = 0
     with torch.no_grad():
-        for data in test_data:
+        for data in tqdm(test_data, desc=f'Evaluating {model_name} with adapter {adapter_name} in {mode} mode', unit='batch'):
             input, label = prompt_generator(data)
             label_string = prompt_generator.label_to_answer(label)
             prob, loss = model(input, label_string)
@@ -36,9 +36,6 @@ def evaluate(model_name, dataset, adapter_name, mode, batch_size=32, device='cpu
             results['label'].extend(label.tolist())
             results['prediction'].extend(torch.argmax(prob, dim=1).tolist())
             results['probabilities'].extend(prob.tolist())
-            i += 1
-            if i == 3:
-                break
     prediction_df = pd.DataFrame(results)
     res = ClassificationStatistics(model_name, model_name_for_results, np.array(results['probabilities']),
                                    np.array(results['prediction']), np.array(results['label']), prediction_df)
