@@ -16,4 +16,6 @@ models = [
 
 datasets = ['qqp', 'mnli']
 
-task_types = ['icl', 'sft']
+eval_types = ['icl', 'sft']
+
+task_types = ['train', 'evaluate']
