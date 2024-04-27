@@ -16,7 +16,7 @@ def parse_args():
                         choices=eval_types)
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size for training')
     parser.add_argument('--device', type=str, default='cpu', help='Device to use for training')
-    parser.add_argument('--adapter_name', type=str, default='None', help='Choose the adapter with which to fine-tune')
+    parser.add_argument('--adapter_name', type=str, default=None, help='Choose the adapter with which to fine-tune')
     parser.add_argument('--checkpoint', type=str, default=None, help='Path to the checkpoint to load')
     args = parser.parse_args()
     return args

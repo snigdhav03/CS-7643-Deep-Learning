@@ -31,6 +31,6 @@ To run the model:
 
 ## Running with Adapters
 Example command:
-```python3 main.py --dataset qqp --model_name opt-125m --task_type icl --device cpu --batch_size 8 --adapter_name PROMPT_TUNING```
+```python3 main.py --dataset qqp --model_name opt-125m --task_type icl --device cpu --batch_size 8 --adapter_name LORA```
 
-Current accepted adapters: LORA, PROMPT_TUNING
+Current accepted adapters: LORA, PREFIX_TUNING, ADALORA, IA3
