@@ -6,7 +6,7 @@ import os
 import torch
 
 
-def in_context_learning(model_name, dataset, adapter_name, batch_size=32, device='cpu', examples=16, checkpoint=None):
+def evaluate(model_name, dataset, adapter_name, mode, batch_size=32, device='cpu', examples=8, checkpoint=None):
     os.makedirs(cache_dir, exist_ok=True)
     if checkpoint is None:
         checkpoint = f'facebook/{model_name}'
@@ -23,5 +23,5 @@ def in_context_learning(model_name, dataset, adapter_name, batch_size=32, device
         for data in test_data:
             input, label = prompt_generator(data)
             label_string = prompt_generator.label_to_answer(label)
-            logit, loss = model(input, label_string)
-            print(logit, loss)
+            prob, loss = model(input, label_string)
+            print(prob, loss)

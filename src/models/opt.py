@@ -2,6 +2,7 @@ from datetime import datetime
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from transformers import OPTForCausalLM, GPT2Tokenizer
 from src.adapters.addAdapter import add_adapter
 
@@ -55,7 +56,24 @@ class OPT(nn.Module):
         labels = torch.tensor([self.tokenizer.encode(label, add_special_tokens=False)[0] for label in labels], device=self.device)
         output = self.model(**tokens, labels=labels)
         logit, loss = output.logits, output.loss
-        return logit, loss
+        result = self.get_classification_probabilities(logit)
+        return result, loss
+
+    def get_classification_probabilities(self, logit):
+        words = ['Yes', 'No']
+        label_ids = {word: self.tokenizer.convert_tokens_to_ids(word) for word in words}
+        prob = F.softmax(logit, dim=-1)
+        mask = torch.full_like(prob, 0)
+        for word, idx in label_ids.items():
+            mask[:, idx] = 1
+        prob = prob * mask
+        prob = prob / prob.sum(dim=-1, keepdim=True)
+        # new_logits = torch.full_like(logit, -float('inf'))
+        # for word, idx in label_ids.items():
+        #     new_logits[:, idx] = logit[:, idx]
+        # prob = F.softmax(new_logits, dim=-1)
+        prob = prob[:, [label_ids[word] for word in words]]
+        return prob
 
     def get_name(self):
         if 'facebook' in self.checkpoint:
