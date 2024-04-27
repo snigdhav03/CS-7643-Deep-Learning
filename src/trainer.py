@@ -1,50 +1,50 @@
 import evaluate
 import numpy as np
 import os
-from datasets import load_dataset
-from transformers import AutoTokenizer, DataCollatorWithPadding, TrainingArguments, Trainer, AutoModelForSequenceClassification
+import torch
+from datasets import load_dataset, Dataset
+from transformers import AutoTokenizer, DataCollatorWithPadding, TrainingArguments, Trainer, AutoModelForSequenceClassification, AutoModelForCausalLM
+from transformers.trainer_utils import IntervalStrategy
 from .data.datasetLoader import DatasetLoader
+from .models.opt import OPT
+from .const import cache_dir
+from .prompts.qqp import QQPPrompt
 
 
-class CustomTrainer:
-    def __init__(self, checkpoint='bert-base-uncased', dataset='qqp', training_args=None, device=None):
-        self.datasetLoader = DatasetLoader(dataset)
+class TrainerLM:
+    def __init__(self, model_name, dataset, adapter_name, batch_size=32, device=None, examples=16, checkpoint=None):
         self.dataset = dataset
-        # TODO: Check why caching isn't working for the AutoTokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained(checkpoint, cache_dir='cache_tokenizer')
-        self.training_args = training_args if training_args else TrainingArguments("test-trainer")
-        self.trainer = self.getTrainer(checkpoint)
+        self.device = device if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.training_args = self.getTrainingArgs()
+        self.datasetLoader = DatasetLoader(dataset, device=self.device, batch_size=batch_size)
+        self.model = self.get_model(model_name, adapter_name, checkpoint)
+        self.trainer = self.getTrainer()
     
-    def tokenize_function(self, examples):
-        if self.dataset == 'qqp':
-            return self.tokenizer(examples["question1"], examples["question2"], padding="max_length", truncation=True)
-        if self.dataset == 'mnli':
-            return self.tokenizer(examples["premise"], examples["hypothesis"], padding="max_length", truncation=True)
-        return self.tokenizer(examples["sentence1"], examples["sentence2"], padding="max_length", truncation=True)
-
-    def getTrainer(self, checkpoint):
-        self.datasetLoader.loadDataset()
-        
-        self.training_args.set_save(strategy="steps", steps=20, total_limit=1)
-
-        data_collator = DataCollatorWithPadding(tokenizer=self.tokenizer)
-        model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
-
-        raw_train = self.datasetLoader.train
-        raw_val = self.datasetLoader.val
-        tokenized_train_datasets = raw_train.map(self.tokenize_function, batched=True)
-        tokenized_val_datasets = raw_val.map(self.tokenize_function, batched=True)
-
-        trainer = Trainer(
-            model,
-            self.training_args,
-            train_dataset=tokenized_train_datasets,
-            eval_dataset=tokenized_val_datasets,
-            data_collator=data_collator,
-            tokenizer=self.tokenizer,
-            compute_metrics=self.compute_metrics
+    
+    def getTrainingArgs(self):
+        return TrainingArguments(
+            output_dir='./results',
+            num_train_epochs=1,
+            per_device_train_batch_size=8,
+            per_device_eval_batch_size=8,
+            logging_dir='./logs',
+            logging_steps=100,         
+            save_steps=50,            
+            evaluation_strategy="steps", 
+            label_names=["text", "labels"],
+            save_strategy=IntervalStrategy.STEPS,
+            save_total_limit=1,
+            save_safetensors=False
         )
 
+    def getTrainer(self):
+        self.datasetLoader.loadDataset()   
+        trainer = CustomTrainer(
+            dataloader=self.datasetLoader,
+            model=self.model,
+            args=self.training_args,
+            compute_metrics=self.compute_metrics
+        )
         return trainer
     
     def train(self):
@@ -55,8 +55,42 @@ class CustomTrainer:
             resume = True
         self.trainer.train(resume_from_checkpoint = resume)
 
+    def get_model(self, model_name, adapter_name, checkpoint):
+        os.makedirs(cache_dir, exist_ok=True)
+        if checkpoint is None:
+            checkpoint = f'facebook/{model_name}'
+        else:
+            checkpoint = f'./{cache_dir}/{checkpoint}'
+        model = OPT(model_name, adapter_name, device=self.device, mode='classifier', checkpoint=checkpoint)
+        return model.to(self.device)
+
     def compute_metrics(self, eval_preds):
         metric = evaluate.load("glue", self.dataset)
         logits, labels = eval_preds
         predictions = np.argmax(logits, axis=-1)
         return metric.compute(predictions=predictions, references=labels)
+
+
+class CustomTrainer(Trainer):
+    def __init__(self, dataloader, **kwargs):
+        super().__init__(**kwargs)
+        self.dataloader = dataloader
+        self.prompt_generator = QQPPrompt(mode='sft', example=16)
+
+    def get_train_dataloader(self):
+        return self.dataloader.train
+
+    def get_eval_dataloader(self, eval_dataset=None):
+        return self.dataloader.val if eval_dataset is None else DataLoader(eval_dataset)
+
+    def prediction_step(self, model, inputs, prediction_loss_only, ignore_keys=None):
+        input, label = self.prompt_generator(inputs)
+        label_string = self.prompt_generator.label_to_answer(label)
+        logit, loss = model(input, label_string)
+        return (loss, None, None) if prediction_loss_only else (loss, logit, None)
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        input, label = self.prompt_generator(inputs)
+        label_string = self.prompt_generator.label_to_answer(label)
+        logit, loss = model(input, label_string)
+        return loss
