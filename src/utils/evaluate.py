@@ -15,7 +15,7 @@ def evaluate(model_name, dataset, adapter_name, mode, batch_size=32, device='cpu
     model = OPT(model_name, adapter_name, device=device, mode='classifier', checkpoint=checkpoint)
     dataset = DatasetLoader(dataset, device=device, batch_size=batch_size)
     dataset.loadDataset()
-    prompt_generator = QQPPrompt(mode='icl', example=examples)
+    prompt_generator = QQPPrompt(mode=mode, example=examples)
     test_data = dataset.val
     model.eval()
     # path = model.save(cache_dir)
