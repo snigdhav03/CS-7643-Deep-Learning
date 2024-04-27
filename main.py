@@ -14,7 +14,7 @@ def parse_args():
                         choices=task_types)
     parser.add_argument('--evaluation_mode', type=str, default='icl', help='Choose the evaluation mode from the given choices',
                         choices=eval_types)
-    parser.add_argument('--batch_size', type=int, default=32, help='Batch size for training')
+    parser.add_argument('--batch_size', type=int, default=8, help='Batch size for training')
     parser.add_argument('--device', type=str, default=None, help='Device to use for training')
     parser.add_argument('--adapter_name', type=str, default=None, help='Choose the adapter with which to fine-tune')
     parser.add_argument('--checkpoint', type=str, default=None, help='Path to the checkpoint to load')
@@ -26,7 +26,7 @@ def main():
     args = parse_args()
     if args.task_type == 'train':
         print(f'Training LM')
-        custom_trainer = TrainerLM(args.model_name, args.dataset, args.adapter_name)
+        custom_trainer = TrainerLM(args.model_name, args.dataset, args.adapter_name, batch_size=args.batch_size)
         custom_trainer.train()
     if args.task_type == 'icl':
         print('In Context Learning')

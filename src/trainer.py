@@ -15,18 +15,18 @@ class TrainerLM:
     def __init__(self, model_name, dataset, adapter_name, batch_size=32, device=None, examples=16, checkpoint=None):
         self.dataset = dataset
         self.device = device if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.training_args = self.getTrainingArgs()
+        self.training_args = self.getTrainingArgs(batch_size)
         self.datasetLoader = DatasetLoader(dataset, device=self.device, batch_size=batch_size)
         self.model = self.get_model(model_name, adapter_name, checkpoint)
         self.trainer = self.getTrainer()
     
     
-    def getTrainingArgs(self):
+    def getTrainingArgs(self, batch_size):
         return TrainingArguments(
             output_dir='./results',
             num_train_epochs=1,
-            per_device_train_batch_size=8,
-            per_device_eval_batch_size=8,
+            per_device_train_batch_size=batch_size,
+            per_device_eval_batch_size=batch_size,
             logging_dir='./logs',
             logging_steps=100,         
             save_steps=50,            
