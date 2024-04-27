@@ -24,7 +24,7 @@ class OPT(nn.Module):
             self.model = OPTForCausalLM.from_pretrained(checkpoint, cache_dir=cache_dir)
         else:
             raise ValueError(f"Invalid mode: {mode}")
-        if adapter_name and adapter_name is not 'None':
+        if adapter_name and adapter_name != 'None':
             self.model = add_adapter(self.model, adapter_name, adapter_config)
         self.tokenizer = GPT2Tokenizer.from_pretrained(f'facebook/{model_name}', cache_dir=cache_dir)
         self.model.to(self.device)
@@ -33,6 +33,7 @@ class OPT(nn.Module):
         self.top_p = top_p
 
     def forward(self, text, labels=None):
+        self.model = self.model.to(self.device)
         tokens = self.tokenizer(text, return_tensors='pt', padding=True).to(self.device)
         if self.mode == 'classifier':
             return self.classifier_forward(tokens, labels)

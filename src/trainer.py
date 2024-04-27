@@ -14,9 +14,10 @@ from .prompts.qqp import QQPPrompt
 class TrainerLM:
     def __init__(self, model_name, dataset, adapter_name, batch_size=32, device=None, examples=16, checkpoint=None):
         self.dataset = dataset
-        self.device = device if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = device
         self.training_args = self.getTrainingArgs(batch_size)
         self.datasetLoader = DatasetLoader(dataset, device=self.device, batch_size=batch_size)
+        self.checkpoint = checkpoint
         self.model = self.get_model(model_name, adapter_name, checkpoint)
         self.trainer = self.getTrainer()
     
@@ -43,7 +44,7 @@ class TrainerLM:
             dataloader=self.datasetLoader,
             model=self.model,
             args=self.training_args,
-            compute_metrics=self.compute_metrics
+            compute_metrics=self.compute_metrics,
         )
         return trainer
     
@@ -51,7 +52,7 @@ class TrainerLM:
         output_dir = self.training_args.output_dir  
         path = os.path.join(os.getcwd(), output_dir)
         resume = None
-        if output_dir and os.path.exists(path) and os.listdir(path):
+        if self.checkpoint is not None:
             resume = True
         self.trainer.train(resume_from_checkpoint = resume)
 
@@ -62,7 +63,7 @@ class TrainerLM:
         else:
             checkpoint = f'./{cache_dir}/{checkpoint}'
         model = OPT(model_name, adapter_name, device=self.device, mode='classifier', checkpoint=checkpoint)
-        return model.to(self.device)
+        return model
 
     def compute_metrics(self, eval_preds):
         metric = evaluate.load("glue", self.dataset)
