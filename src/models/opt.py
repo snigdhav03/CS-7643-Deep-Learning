@@ -60,7 +60,7 @@ class OPT(nn.Module):
         return result, loss
 
     def get_classification_probabilities(self, logit):
-        words = ['Yes', 'No']
+        words = ['No', 'Yes']
         label_ids = {word: self.tokenizer.convert_tokens_to_ids(word) for word in words}
         prob = F.softmax(logit, dim=-1)
         mask = torch.full_like(prob, 0)
