@@ -33,4 +33,4 @@ To run the model:
 Example command:
 ```python3 main.py --dataset qqp --model_name opt-125m --task_type icl --device cpu --batch_size 8 --adapter_name LORA```
 
-Current accepted adapters: LORA, PREFIX_TUNING, ADALORA, IA3
+Current accepted adapters: LORA, PREFIX_TUNING, ADALORA, IA3, LOHA, LOKR, OFT
