@@ -22,8 +22,7 @@ class TrainerLM:
         self.trainer = self.getTrainer()
 
     def getTrainingArgs(self, batch_size):
-        timestamp_str = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-        new_checkpoint = f'models--local--{self.model_name}--{self.adapter_name}--{timestamp_str}'
+        new_checkpoint = f'models--local--{self.model_name}--{self.adapter_name}'
         output_dir = f'./{checkpoint_dir}/{new_checkpoint}'
         os.makedirs(output_dir, exist_ok=True)
         return TrainingArguments(
@@ -32,8 +31,8 @@ class TrainerLM:
             per_device_train_batch_size=batch_size,
             per_device_eval_batch_size=batch_size,
             logging_dir='./logs',
-            logging_steps=500,
-            save_steps=500,
+            logging_steps=1000,
+            save_steps=1000,
             evaluation_strategy="steps",
             label_names=["text", "labels"],
             save_strategy=IntervalStrategy.STEPS,

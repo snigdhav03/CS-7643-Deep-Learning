@@ -1,0 +1,18 @@
+Results for Model:  Opt-125m Ia3 Sft
+Confusion Matrix: 
+ [[17774  7771]
+ [ 4482 10403]]
+Classification Report: 
+               precision    recall  f1-score   support
+
+           0       0.80      0.70      0.74     25545
+           1       0.57      0.70      0.63     14885
+
+    accuracy                           0.70     40430
+   macro avg       0.69      0.70      0.69     40430
+weighted avg       0.72      0.70      0.70     40430
+
+Accuracy Score:  0.6969329705664111
+F1 Score:  0.7015824280659562
+Precision Score:  0.7153348537122819
+Recall Score:  0.6969329705664111

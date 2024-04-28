@@ -1,0 +1,18 @@
+Results for Model:  Opt-125m Prefix Tuning Sft
+Confusion Matrix: 
+ [[22280  3265]
+ [11017  3868]]
+Classification Report: 
+               precision    recall  f1-score   support
+
+           0       0.67      0.87      0.76     25545
+           1       0.54      0.26      0.35     14885
+
+    accuracy                           0.65     40430
+   macro avg       0.61      0.57      0.55     40430
+weighted avg       0.62      0.65      0.61     40430
+
+Accuracy Score:  0.6467474647538957
+F1 Score:  0.6078308796240792
+Precision Score:  0.622423283887178
+Recall Score:  0.6467474647538957
