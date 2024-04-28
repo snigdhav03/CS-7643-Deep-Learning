@@ -1,6 +1,7 @@
 project_dir = '.'
 
 cache_dir = 'cache'
+checkpoint_dir = 'trainer_checkpoints'
 
 # Models
 models = [

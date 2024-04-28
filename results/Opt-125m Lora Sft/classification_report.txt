@@ -1,0 +1,18 @@
+Results for Model:  Opt-125m Lora Sft
+Confusion Matrix: 
+ [[22370  3175]
+ [ 2447 12438]]
+Classification Report: 
+               precision    recall  f1-score   support
+
+           0       0.90      0.88      0.89     25545
+           1       0.80      0.84      0.82     14885
+
+    accuracy                           0.86     40430
+   macro avg       0.85      0.86      0.85     40430
+weighted avg       0.86      0.86      0.86     40430
+
+Accuracy Score:  0.8609448429384121
+F1 Score:  0.8615994502643763
+Precision Score:  0.8628310960274821
+Recall Score:  0.8609448429384121

@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import OPTForCausalLM, GPT2Tokenizer
 from src.adapters.addAdapter import add_adapter
+from src.const import cache_dir, checkpoint_dir
 
 from src.models.opt_with_classifier import OPTWithLMClassifier
 import os
@@ -21,7 +22,7 @@ class OPT(nn.Module):
         self.mode = mode
         self.adapter_name = adapter_name
         self.adapter_config = adapter_config
-        facebook_checkpoint=f'facebook/{model_name}'
+        facebook_checkpoint = f'facebook/{model_name}'
         if mode == 'classifier':
             self.model = OPTWithLMClassifier.from_pretrained(facebook_checkpoint, cache_dir=cache_dir)
         elif mode == 'generator':
@@ -30,12 +31,12 @@ class OPT(nn.Module):
             raise ValueError(f"Invalid mode: {mode}")
         if adapter_name and adapter_name is not None:
             self.model = add_adapter(self)
-        if checkpoint is not None:    
-            path = os.path.join(os.getcwd(), checkpoint)
-            print(f'\n\nLoading Model from checkpoint: {path}\n\n')
-            self.load_state_dict(torch.load(path))
-        self.tokenizer = GPT2Tokenizer.from_pretrained(f'facebook/{model_name}', cache_dir=cache_dir)
         self.model.to(self.device)
+        if checkpoint is not None:    
+            path = os.path.join(checkpoint_dir, checkpoint, 'pytorch_model.bin')
+            print(f'\n\nLoading Model from checkpoint: {path}\n\n')
+            self.load_state_dict(torch.load(path, map_location=self.device))
+        self.tokenizer = GPT2Tokenizer.from_pretrained(f'facebook/{model_name}', cache_dir=cache_dir)
         self.sample = sample
         self.top_k = top_k
         self.top_p = top_p

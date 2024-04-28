@@ -28,10 +28,10 @@ class ClassificationStatistics:
         plt.imshow(cm, interpolation='nearest', cmap='GnBu')
         plt.title('Confusion Matrix for ' + self._model_name)
         plt.colorbar()
-        plt.xticks([0, 1], ['Away Team', 'Home Team'])
-        plt.yticks([0, 1], ['Away Team', 'Home Team'])
-        plt.xlabel('Predicted Winner')
-        plt.ylabel('Actual Winner')
+        plt.xticks([0, 1], ['No', 'Yes'])
+        plt.yticks([0, 1], ['No', 'Yes'])
+        plt.xlabel('Predicted Answer')
+        plt.ylabel('Actual Answer')
         for i in range(cm.shape[0]):
             for j in range(cm.shape[1]):
                 plt.text(j, i, cm[i, j], horizontalalignment="center",
@@ -60,10 +60,11 @@ class ClassificationStatistics:
 
     def save_results(self):
         os.makedirs(project_dir + '/results/' + self._model_name, exist_ok=True)
+        self.get_confusion_matrix()
         with open(project_dir + '/results/' + self._model_name + '/classification_report.txt', 'w') as f:
             print('Results for Model: ', self._model_name, file=f)
-            # print('Confusion Matrix: \n', self.get_confusion_matrix(), file=f)
-            # print('Classification Report: \n', self.get_classification_report(), file=f)
+            print('Confusion Matrix: \n', self.get_confusion_matrix(), file=f)
+            print('Classification Report: \n', self.get_classification_report(), file=f)
             print('Accuracy Score: ', self.get_accuracy_score(), file=f)
             print('F1 Score: ', self.get_f1_score(), file=f)
             print('Precision Score: ', self.get_precision_score(), file=f)

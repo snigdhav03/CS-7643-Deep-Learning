@@ -1,19 +1,18 @@
-import evaluate
-import numpy as np
+from datetime import datetime
 import os
-import torch
-from datasets import load_dataset, Dataset
-from transformers import AutoTokenizer, DataCollatorWithPadding, TrainingArguments, Trainer, AutoModelForSequenceClassification, AutoModelForCausalLM
+from transformers import TrainingArguments, Trainer
 from transformers.trainer_utils import IntervalStrategy
 from .data.datasetLoader import DatasetLoader
 from .models.opt import OPT
-from .const import cache_dir
+from .const import cache_dir, checkpoint_dir
 from .prompts.qqp import QQPPrompt
 from torch.utils.data import DataLoader
 
 
 class TrainerLM:
     def __init__(self, model_name, dataset, adapter_name, batch_size=32, device=None, examples=16, checkpoint=None):
+        self.model_name = model_name
+        self.adapter_name = adapter_name
         self.dataset = dataset
         self.device = device
         self.training_args = self.getTrainingArgs(batch_size)
@@ -21,18 +20,21 @@ class TrainerLM:
         self.checkpoint = checkpoint
         self.model = self.get_model(model_name, adapter_name)
         self.trainer = self.getTrainer()
-    
-    
+
     def getTrainingArgs(self, batch_size):
+        timestamp_str = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+        new_checkpoint = f'models--local--{self.model_name}--{self.adapter_name}--{timestamp_str}'
+        output_dir = f'./{checkpoint_dir}/{new_checkpoint}'
+        os.makedirs(output_dir, exist_ok=True)
         return TrainingArguments(
-            output_dir='./trainer_checkpoints/opt125mLORA_4',
+            output_dir=output_dir,
             num_train_epochs=1,
             per_device_train_batch_size=batch_size,
             per_device_eval_batch_size=batch_size,
             logging_dir='./logs',
-            logging_steps=500,         
-            save_steps=500,            
-            evaluation_strategy="steps", 
+            logging_steps=500,
+            save_steps=500,
+            evaluation_strategy="steps",
             label_names=["text", "labels"],
             save_strategy=IntervalStrategy.STEPS,
             save_total_limit=1,
@@ -40,7 +42,7 @@ class TrainerLM:
         )
 
     def getTrainer(self):
-        self.datasetLoader.loadDataset()   
+        self.datasetLoader.loadDataset()
         trainer = CustomTrainer(
             dataloader=self.datasetLoader,
             model=self.model,
@@ -48,14 +50,14 @@ class TrainerLM:
             # compute_metrics=self.compute_metrics,
         )
         return trainer
-    
+
     def train(self):
-        output_dir = self.training_args.output_dir  
+        output_dir = self.training_args.output_dir
         path = os.path.join(os.getcwd(), output_dir)
         resume = None
         if output_dir and os.path.exists(path) and os.listdir(path):
             resume = True
-        self.trainer.train(resume_from_checkpoint = resume)
+        self.trainer.train(resume_from_checkpoint=resume)
 
     def get_model(self, model_name, adapter_name):
         os.makedirs(cache_dir, exist_ok=True)
