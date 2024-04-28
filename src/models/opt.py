@@ -7,6 +7,7 @@ from transformers import OPTForCausalLM, GPT2Tokenizer
 from src.adapters.addAdapter import add_adapter
 
 from src.models.opt_with_classifier import OPTWithLMClassifier
+import os
 
 
 class OPT(nn.Module):
@@ -20,14 +21,19 @@ class OPT(nn.Module):
         self.mode = mode
         self.adapter_name = adapter_name
         self.adapter_config = adapter_config
+        facebook_checkpoint=f'facebook/{model_name}'
         if mode == 'classifier':
-            self.model = OPTWithLMClassifier.from_pretrained(checkpoint, cache_dir=cache_dir)
+            self.model = OPTWithLMClassifier.from_pretrained(facebook_checkpoint, cache_dir=cache_dir)
         elif mode == 'generator':
-            self.model = OPTForCausalLM.from_pretrained(checkpoint, cache_dir=cache_dir)
+            self.model = OPTForCausalLM.from_pretrained(facebook_checkpoint, cache_dir=cache_dir)
         else:
             raise ValueError(f"Invalid mode: {mode}")
         if adapter_name and adapter_name is not None:
             self.model = add_adapter(self)
+        if checkpoint is not None:    
+            path = os.path.join(os.getcwd(), checkpoint)
+            print(f'\n\nLoading Model from checkpoint: {path}\n\n')
+            self.load_state_dict(torch.load(path))
         self.tokenizer = GPT2Tokenizer.from_pretrained(f'facebook/{model_name}', cache_dir=cache_dir)
         self.model.to(self.device)
         self.sample = sample
@@ -60,6 +66,7 @@ class OPT(nn.Module):
         output = self.model(**tokens, labels=labels)
         logit, loss = output.logits, output.loss
         result = self.get_classification_probabilities(logit)
+        result, loss = result.to(self.device), loss.to(self.device)
         return result, loss
 
     def get_classification_probabilities(self, logit):

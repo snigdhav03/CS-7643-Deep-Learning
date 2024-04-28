@@ -13,10 +13,6 @@ import torch
 
 def evaluate(model_name, dataset, adapter_name, mode, batch_size=32, device='cpu', examples=8, checkpoint=None):
     os.makedirs(cache_dir, exist_ok=True)
-    if checkpoint is None:
-        checkpoint = f'facebook/{model_name}'
-    else:
-        checkpoint = f'./{cache_dir}/{checkpoint}'
     model = OPT(model_name, adapter_name, device=device, mode='classifier', checkpoint=checkpoint)
     dataset = DatasetLoader(dataset, device=device, batch_size=batch_size)
     dataset.loadDataset()

@@ -9,6 +9,7 @@ from .data.datasetLoader import DatasetLoader
 from .models.opt import OPT
 from .const import cache_dir
 from .prompts.qqp import QQPPrompt
+from torch.utils.data import DataLoader
 
 
 class TrainerLM:
@@ -18,19 +19,19 @@ class TrainerLM:
         self.training_args = self.getTrainingArgs(batch_size)
         self.datasetLoader = DatasetLoader(dataset, device=self.device, batch_size=batch_size)
         self.checkpoint = checkpoint
-        self.model = self.get_model(model_name, adapter_name, checkpoint)
+        self.model = self.get_model(model_name, adapter_name)
         self.trainer = self.getTrainer()
     
     
     def getTrainingArgs(self, batch_size):
         return TrainingArguments(
-            output_dir='./results',
+            output_dir='./trainer_checkpoints/opt125mLORA_4',
             num_train_epochs=1,
             per_device_train_batch_size=batch_size,
             per_device_eval_batch_size=batch_size,
             logging_dir='./logs',
-            logging_steps=100,         
-            save_steps=50,            
+            logging_steps=500,         
+            save_steps=500,            
             evaluation_strategy="steps", 
             label_names=["text", "labels"],
             save_strategy=IntervalStrategy.STEPS,
@@ -44,7 +45,7 @@ class TrainerLM:
             dataloader=self.datasetLoader,
             model=self.model,
             args=self.training_args,
-            compute_metrics=self.compute_metrics,
+            # compute_metrics=self.compute_metrics,
         )
         return trainer
     
@@ -52,24 +53,20 @@ class TrainerLM:
         output_dir = self.training_args.output_dir  
         path = os.path.join(os.getcwd(), output_dir)
         resume = None
-        if self.checkpoint is not None:
+        if output_dir and os.path.exists(path) and os.listdir(path):
             resume = True
         self.trainer.train(resume_from_checkpoint = resume)
 
-    def get_model(self, model_name, adapter_name, checkpoint):
+    def get_model(self, model_name, adapter_name):
         os.makedirs(cache_dir, exist_ok=True)
-        if checkpoint is None:
-            checkpoint = f'facebook/{model_name}'
-        else:
-            checkpoint = f'./{cache_dir}/{checkpoint}'
-        model = OPT(model_name, adapter_name, device=self.device, mode='classifier', checkpoint=checkpoint)
+        model = OPT(model_name, adapter_name, device=self.device, mode='classifier', checkpoint=self.checkpoint)
         return model
 
-    def compute_metrics(self, eval_preds):
-        metric = evaluate.load("glue", self.dataset)
-        logits, labels = eval_preds
-        predictions = np.argmax(logits, axis=-1)
-        return metric.compute(predictions=predictions, references=labels)
+    # def compute_metrics(self, eval_preds):
+    #     metric = evaluate.load("glue", self.dataset)
+    #     logits, labels = eval_preds
+    #     predictions = np.argmax(logits, axis=-1)
+    #     return metric.compute(predictions=predictions, references=labels)
 
 
 class CustomTrainer(Trainer):
@@ -85,6 +82,7 @@ class CustomTrainer(Trainer):
         return self.dataloader.val if eval_dataset is None else DataLoader(eval_dataset)
 
     def prediction_step(self, model, inputs, prediction_loss_only, ignore_keys=None):
+        return (None, None, None)
         input, label = self.prompt_generator(inputs)
         label_string = self.prompt_generator.label_to_answer(label)
         logit, loss = model(input, label_string)

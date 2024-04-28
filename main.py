@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=8, help='Batch size for training')
     parser.add_argument('--device', type=str, default='cpu', help='Device to use for training')
     parser.add_argument('--adapter_name', type=str, default=None, help='Choose the adapter with which to fine-tune')
-    parser.add_argument('--checkpoint', type=str, default=None, help='Path to the checkpoint to load')
+    parser.add_argument('--checkpoint', type=str, default=None, help='Path to the checkpoint to load, eg: trainer_checkpoints/opt125mLORA/checkpoint-45000/pytorch_model.bin')
     args = parser.parse_args()
     return args
 
@@ -26,7 +26,7 @@ def main():
     args = parse_args()
     if args.task_type == 'train':
         print(f'Training LM')
-        custom_trainer = TrainerLM(args.model_name, args.dataset, args.adapter_name, batch_size=args.batch_size, device=args.device)
+        custom_trainer = TrainerLM(args.model_name, args.dataset, args.adapter_name, batch_size=args.batch_size, device=args.device, checkpoint=args.checkpoint)
         custom_trainer.train()
     if args.task_type == 'evaluate':
         evaluate(args.model_name, args.dataset, mode=args.evaluation_mode, batch_size=args.batch_size, device=args.device,
