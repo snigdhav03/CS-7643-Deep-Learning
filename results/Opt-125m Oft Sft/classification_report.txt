@@ -1,0 +1,18 @@
+Results for Model:  Opt-125m Oft Sft
+Confusion Matrix: 
+ [[21536  4009]
+ [ 2607 12278]]
+Classification Report: 
+               precision    recall  f1-score   support
+
+           0       0.89      0.84      0.87     25545
+           1       0.75      0.82      0.79     14885
+
+    accuracy                           0.84     40430
+   macro avg       0.82      0.83      0.83     40430
+weighted avg       0.84      0.84      0.84     40430
+
+Accuracy Score:  0.83635913925303
+F1 Score:  0.8377304654149551
+Precision Score:  0.8411503389915523
+Recall Score:  0.83635913925303
