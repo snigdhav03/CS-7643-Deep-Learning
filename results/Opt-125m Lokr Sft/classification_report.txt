@@ -1,0 +1,18 @@
+Results for Model:  Opt-125m Lokr Sft
+Confusion Matrix: 
+ [[19965  5580]
+ [ 2481 12404]]
+Classification Report: 
+               precision    recall  f1-score   support
+
+           0       0.89      0.78      0.83     25545
+           1       0.69      0.83      0.75     14885
+
+    accuracy                           0.80     40430
+   macro avg       0.79      0.81      0.79     40430
+weighted avg       0.82      0.80      0.80     40430
+
+Accuracy Score:  0.8006183527083849
+F1 Score:  0.8035800434191771
+Precision Score:  0.8159289194663363
+Recall Score:  0.8006183527083849
