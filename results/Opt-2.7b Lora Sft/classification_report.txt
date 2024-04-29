@@ -1,0 +1,18 @@
+Results for Model:  Opt-2.7b Lora Sft
+Confusion Matrix: 
+ [[21899  3646]
+ [ 1397 13488]]
+Classification Report: 
+               precision    recall  f1-score   support
+
+           0       0.94      0.86      0.90     25545
+           1       0.79      0.91      0.84     14885
+
+    accuracy                           0.88     40430
+   macro avg       0.86      0.88      0.87     40430
+weighted avg       0.88      0.88      0.88     40430
+
+Accuracy Score:  0.8752658916646054
+F1 Score:  0.8767746858569907
+Precision Score:  0.8837671394865978
+Recall Score:  0.8752658916646054
