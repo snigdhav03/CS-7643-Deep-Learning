@@ -7,7 +7,7 @@
 
 This work introduces a novel approach that utilizes parameter-efficient fine-tuning (PEFT) techniques to adapt language models (LMs) for downstream text classification tasks with significantly reduced resource requirements. We experiment with a variety of adapters, including LoRA, Prefix Tuning, LoHA, LoKR, IA3, OFT, and AdaLoRA, to demonstrate that substantial reductions in the number of trainable parameters can be achieved while maintain- ing competitive performance when finetuning LMs for a downstream task. We use Quora Question Pairs (QQP) dataset from the GLUE benchmark to evaluate the effec- tiveness of these adapters on the OPT model variants ranging from 125M to 2.7B parameters. Our findings indicate that adapters like LoRA not only preserve the capabilities of LMs but also enhance their adaptability to specific tasks, offering an optimal balance between performance and efficiency. They achieve accuracy within 0.75% while finetuning only 6.6% of parameters and using only using 7.37% extra memory. The results highlight the potential of scalable, adaptable LMs in practical applications which will be beneficial when finetuning in resource-constrained environments.
 
-**Link to full report containing all the results** - [https://drive.google.com/file/d/1WTyz8BwX-6qywZ-pj_ZVxxJHA7lkqMY0/view?usp=share_link](https://drive.google.com/file/d/1WTyz8BwX-6qywZ-pj_ZVxxJHA7lkqMY0/view?usp=share_link)
+**Link to full report containing all the results** - [Project Report](https://drive.google.com/file/d/1WTyz8BwX-6qywZ-pj_ZVxxJHA7lkqMY0/view?usp=share_link)
 
 Team Members - Ananya Sharma, Snigdha Verma, Neelabh Sinha
 
