@@ -9,6 +9,8 @@ This work introduces a novel approach that utilizes parameter-efficient fine-tun
 
 Link to full report containing all the results - [https://drive.google.com/file/d/1WTyz8BwX-6qywZ-pj_ZVxxJHA7lkqMY0/view?usp=share_link](https://drive.google.com/file/d/1WTyz8BwX-6qywZ-pj_ZVxxJHA7lkqMY0/view?usp=share_link)
 
+Team Members - Ananya Sharma, Snigdha Verma, Neelabh Sinha
+
 ## Usage
 
 ### Setup
